@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static org.bytedeco.javacpp.opencv_highgui.IMREAD_COLOR;
 import static org.bytedeco.javacpp.opencv_highgui.imread;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,8 +48,6 @@ public class MainActivity extends AppCompatActivity {
         btnLibrary = (Button) findViewById(R.id.btnLibrary);
         btnAnalysis = (Button) findViewById(R.id.btnAnalysis);
         imgAnalysis = (ImageView) findViewById(R.id.imgAnalysis);
-
-        imgAnalysis.setImageResource(R.drawable.malou);
 
         btnCapture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,11 +83,15 @@ public class MainActivity extends AppCompatActivity {
                 Bundle extras = data.getExtras();
                 Uri takenPhoto = (Uri) extras.get(MediaStore.EXTRA_OUTPUT);
                 imgAnalysis.setImageURI(takenPhoto);
+                btnAnalysis.setEnabled(true);
+                btnAnalysis.setText("Analysis");
             }
 
             if(requestCode == REQUEST_IMAGE_SELECT) {
                 Uri selectedPhoto = data.getData();
                 imgAnalysis.setImageURI(selectedPhoto);
+                btnAnalysis.setEnabled(true);
+                btnAnalysis.setText("Analysis");
             }
 
         }

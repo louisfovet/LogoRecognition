@@ -28,8 +28,7 @@
                 android:layout_weight="1"
                 android:background="?attr/colorPrimary"
                 android:textColor="#dedede"
-                android:layout_marginRight="1dp"
-                android:clickable="true" />
+                android:layout_marginRight="1dp"/>
 
             <Button
                 android:layout_width="fill_parent"
@@ -39,8 +38,7 @@
                 android:layout_weight="1"
                 android:background="?attr/colorPrimary"
                 android:textColor="#dedede"
-                android:layout_marginLeft="1dp"
-                android:clickable="true" />
+                android:layout_marginLeft="1dp"/>
         </LinearLayout>
 
         <ImageView
@@ -51,11 +49,11 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Analysis"
+            android:text="Capture/select a photo"
             android:id="@+id/btnAnalysis"
             android:textColor="#dedede"
             android:background="?attr/colorPrimary"
             android:layout_marginTop="2dp"
-            android:clickable="true" />
+            android:enabled="false" />
     </LinearLayout>
 </RelativeLayout>
