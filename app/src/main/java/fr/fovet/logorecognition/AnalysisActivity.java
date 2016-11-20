@@ -1,6 +1,8 @@
 package fr.fovet.logorecognition;
 
+import android.content.Intent;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -29,6 +31,15 @@ public class AnalysisActivity extends AppCompatActivity {
         imgLogo = (ImageView) findViewById(R.id.imgLogo);
 
         imgLogo.setImageResource(R.drawable.apple_logo);
+
+        btnWebsite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://www.apple.com"));
+                startActivity(browserIntent);
+            }
+        });
 
     }
 
