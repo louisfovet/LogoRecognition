@@ -8,10 +8,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import static org.bytedeco.javacpp.opencv_highgui.imread;
 
 public class MainActivity extends AppCompatActivity {
+
+    protected Button btnCapture;
+    protected Button btnLibrary;
+    protected Button btnAnalysis;
+    protected ImageView imgAnalysis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +26,34 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        btnCapture = (Button) findViewById(R.id.btnCapture);
+        btnLibrary = (Button) findViewById(R.id.btnLibrary);
+        btnAnalysis = (Button) findViewById(R.id.btnAnalysis);
+        imgAnalysis = (ImageView) findViewById(R.id.imgAnalysis);
+
+        imgAnalysis.setImageResource(R.drawable.malou);
+
+        btnCapture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        btnLibrary.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        btnAnalysis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
     }
 
