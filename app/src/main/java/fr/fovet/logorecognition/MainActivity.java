@@ -31,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_SELECT = 2;
 
-    protected Button btnCapture;
-    protected Button btnLibrary;
-    protected Button btnAnalysis;
-    protected ImageView imgAnalysis;
+    private Button btnCapture;
+    private Button btnLibrary;
+    private Button btnAnalysis;
+    private ImageView imgAnalysis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
         btnAnalysis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
+                startActivity(intent);
             }
         });
 
