@@ -1,15 +1,12 @@
 package fr.fovet.logorecognition;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,13 +16,16 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.javacpp.opencv_calib3d;
+import org.bytedeco.javacpp.opencv_core.*;
+import org.bytedeco.javacpp.opencv_features2d.*;
+import org.bytedeco.javacpp.opencv_nonfree.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import static org.bytedeco.javacpp.opencv_highgui.IMREAD_COLOR;
-import static org.bytedeco.javacpp.opencv_highgui.imread;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private Button btnLibrary;
     private Button btnAnalysis;
     private ImageView imgAnalysis;
+
+    private Uri photoURI;
+    private String photoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +69,14 @@ public class MainActivity extends AppCompatActivity {
         btnAnalysis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
-                startActivity(intent);
+                //Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
+                //startActivity(intent);
+                try {
+                    Utils.callOpenCV(photoPath);
+                    btnAnalysis.setText("ok");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -80,19 +89,16 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode == RESULT_OK && data != null) {
 
             if(requestCode == REQUEST_IMAGE_CAPTURE) {
-                Bundle extras = data.getExtras();
-                Uri takenPhoto = (Uri) extras.get(MediaStore.EXTRA_OUTPUT);
-                imgAnalysis.setImageURI(takenPhoto);
-                btnAnalysis.setEnabled(true);
-                btnAnalysis.setText("Analysis");
             }
 
             if(requestCode == REQUEST_IMAGE_SELECT) {
-                Uri selectedPhoto = data.getData();
-                imgAnalysis.setImageURI(selectedPhoto);
-                btnAnalysis.setEnabled(true);
-                btnAnalysis.setText("Analysis");
+                photoURI = data.getData();
             }
+
+
+            imgAnalysis.setImageURI(photoURI);
+            btnAnalysis.setEnabled(true);
+            btnAnalysis.setText("Analysis");
 
         }
 
@@ -141,9 +147,8 @@ public class MainActivity extends AppCompatActivity {
                 // Error occurred while creating the File
             }
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this, "fr.fovet.logorecognition",
-                        photoFile);
-
+                photoPath = photoFile.getAbsolutePath();
+                photoURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
@@ -157,4 +162,9 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(selectPictureIntent, REQUEST_IMAGE_SELECT);
         }
     }
+
+
+
+
+
 }
