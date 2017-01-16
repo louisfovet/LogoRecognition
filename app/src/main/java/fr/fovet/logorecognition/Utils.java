@@ -119,4 +119,39 @@ public class Utils {
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
 
+    public static String getWebsite(String match) {
+        String website = "";
+
+        switch (match) {
+            case "apple0.png": website = "https://www.apple.com";
+                break;
+            case "burgerking0.png": website = "https://www.burgerking.fr";
+                break;
+            case "facebook0.png": website = "https://www.facebook.com";
+                break;
+            case "google0.png": website = "https://www.google.fr";
+                break;
+            case "hp0.png": website = "http://www8.hp.com/fr/fr/home.html";
+                break;
+            case "kfc0.png": website = "https://www.kfc.fr";
+                break;
+            case "leffe0.png": website = "http://www.leffe.com";
+                break;
+            case "logitech0.png": website = "http://www.logitech.fr/fr-fr";
+                break;
+            case "orange0.png": website = "http://www.orange.fr";
+                break;
+            case "starbucks0.png": website = "https://www.starbucks.fr/café";
+                break;
+            case "telecomlille0.png": website = "http://www.telecom-lille.fr";
+                break;
+            case "twitter0.png": website = "https://twitter.com";
+                break;
+            default: website = "http://www.google.fr";
+                break;
+        }
+
+        return website;
+    }
+
 }

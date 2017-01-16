@@ -58,14 +58,7 @@ public class MainActivity extends AppCompatActivity {
         btnAnalysis = (Button) findViewById(R.id.btnAnalysis);
         imgAnalysis = (ImageView) findViewById(R.id.imgAnalysis);
 
-        btnAnalysis.setEnabled(true);
-
         assetManager = new AssetManager(this);
-
-        /*String refFile = "starbucks0.png";
-        filePath = Utils.AssetToCache(this, "images" + "/" + refFile, refFile).getPath();
-        Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-        imgAnalysis.setImageBitmap(bitmap);*/
 
         btnCapture.setOnClickListener(new View.OnClickListener() {
             @Override

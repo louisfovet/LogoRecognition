@@ -20,6 +20,7 @@ public class AnalysisActivity extends AppCompatActivity {
 
     private Button btnWebsite;
     private ImageView imgLogo;
+    String website;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +36,7 @@ public class AnalysisActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String match = intent.getStringExtra("MATCH");
-
+        website = Utils.getWebsite(match);
 
         String filePath = Utils.AssetToCache(this, "images" + "/" + match, match).getPath();
         Bitmap bitmap = BitmapFactory.decodeFile(filePath);
@@ -46,7 +47,7 @@ public class AnalysisActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://www.apple.com"));
+                        Uri.parse(website));
                 startActivity(browserIntent);
             }
         });
