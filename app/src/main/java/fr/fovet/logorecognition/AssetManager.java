@@ -77,44 +77,71 @@ public class AssetManager {
         BFMatcher matcher = new BFMatcher(NORM_L2, false);
         DMatchVectorVector matches = new DMatchVectorVector();
 
-        /*for(int i = 0; i < assetNames.length; i++) {
-            matcher.match(descriptor, assetDescriptors[i], matches);
-        }*/
+        float distMin = Float.MAX_VALUE;
+        int idxMatch = -1;
 
-        matcher.knnMatch(descriptor, assetDescriptors[0], matches, 2);
+        for(int i = 0; i < assetNames.length; i++) {
+            matcher.knnMatch(descriptor, assetDescriptors[i], matches, 2);
+            float distMoy = refineMatches(matches);
 
-        return "test";
-    }
-
-    private static DMatch[] toArray(DMatchVectorVector matches) {
-        assert matches.size() <= Integer.MAX_VALUE;
-        // for the simplicity of the implementation we will assume that number of key points is within Int range.
-        int n = (int) matches.size();
-
-        // Convert keyPoints to Scala sequence
-        DMatch[] result = new DMatch[n];
-        for (int i = 0; i < n; i++) {
-            result[i] = new DMatch(matches.);
-        }
-        return result;
-    }
-
-    private static float getScore(DMatchVectorVector matches, int numberToSelect) {
-        float score = 0;
-
-        // Convert to Scala collection, and sort
-        DMatch[] sorted = toArray(matches);
-
-        Arrays.sort(sorted, (a, b)  {
-            return a.lessThan(b) ? -1 : 1;
-        });
-
-        for (int i = 0; i < numberToSelect; i ++) {
-            score += sorted[i].distance();
+            if(distMoy < distMin) {
+                distMin = distMoy;
+                idxMatch = i;
+            }
         }
 
-        score /= numberToSelect;
-        return score;
+        return assetNames[idxMatch];
+
+    }
+
+    private static float refineMatches(DMatchVectorVector oldMatches) {
+        // Ratio of Distances
+        double RoD = 0.6;
+        DMatchVectorVector newMatches = new DMatchVectorVector();
+
+        // Refine results 1: Accept only those matches, where best dist is < RoD
+        // of 2nd best match.
+        int sz = 0;
+        newMatches.resize(oldMatches.size());
+
+        double maxDist = 0.0, minDist = Double.MAX_VALUE; // infinity
+
+        for (int i = 0; i < oldMatches.size(); i++) {
+            newMatches.resize(i, 1);
+            if (oldMatches.get(i, 0).distance() < RoD
+                    * oldMatches.get(i, 1).distance()) {
+                newMatches.put(sz, 0, oldMatches.get(i, 0));
+                sz++;
+                double distance = oldMatches.get(i, 0).distance();
+                if (distance < minDist)
+                    minDist = distance;
+                if (distance > maxDist)
+                    maxDist = distance;
+            }
+        }
+        newMatches.resize(sz);
+
+        // Refine results 2: accept only those matches which distance is no more
+        // than 3x greater than best match
+        sz = 0;
+        DMatchVectorVector brandNewMatches = new DMatchVectorVector();
+        brandNewMatches.resize(newMatches.size());
+        for (int i = 0; i < newMatches.size(); i++) {
+            // Since minDist may be equal to 0.0, add some non-zero value
+            if (newMatches.get(i, 0).distance() <= 3 * minDist) {
+                brandNewMatches.resize(sz, 1);
+                brandNewMatches.put(sz, 0, newMatches.get(i, 0));
+                sz++;
+            }
+        }
+        brandNewMatches.resize(sz);
+
+        float somme= 0;
+        for(int i=0; i < brandNewMatches.size(); i++){
+            somme += brandNewMatches.get(i,0).distance();
+        }
+
+        return somme / brandNewMatches.size();
     }
 
 }

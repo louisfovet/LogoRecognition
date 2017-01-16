@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_calib3d;
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgAnalysis;
 
     private Uri photoURI;
-    private String photoPath;
     private String filePath;
 
     private AssetManager assetManager;
@@ -62,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
 
         assetManager = new AssetManager(this);
 
-        String refFile = "starbucks0.png";
+        /*String refFile = "starbucks0.png";
         filePath = Utils.AssetToCache(this, "images" + "/" + refFile, refFile).getPath();
         Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-        imgAnalysis.setImageBitmap(bitmap);
+        imgAnalysis.setImageBitmap(bitmap);*/
 
         btnCapture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,13 +84,14 @@ public class MainActivity extends AppCompatActivity {
         btnAnalysis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
-                //startActivity(intent);
                 try {
 
-                    Mat descriptor = new Mat();
-                    descriptor = Utils.getDescriptor(getApplicationContext(), filePath);
-                    assetManager.searchForMatch(descriptor);
+                    Mat descriptor = Utils.getDescriptor(getApplicationContext(), filePath);
+                    String match = assetManager.searchForMatch(descriptor);
+
+                    Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
+                    intent.putExtra("MATCH", match);
+                    startActivity(intent);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 photoURI = data.getData();
             }
 
-            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+            Bitmap bitmap = BitmapFactory.decodeFile(photoURI.getPath());
             Bitmap resizedBitmap = Utils.scaleBitmapDown(bitmap, 500);
             filePath = Utils.BitmapToCache(this, resizedBitmap, "test.jpg").getPath();
 
@@ -169,8 +170,6 @@ public class MainActivity extends AppCompatActivity {
                 // Error occurred while creating the File
             }
             if (photoFile != null) {
-                photoPath = photoFile.getAbsolutePath();
-                //photoURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", photoFile);
                 photoURI = Uri.fromFile(photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);

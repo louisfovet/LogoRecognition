@@ -1,6 +1,8 @@
 package fr.fovet.logorecognition;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class AnalysisActivity extends AppCompatActivity {
 
@@ -30,7 +33,14 @@ public class AnalysisActivity extends AppCompatActivity {
         btnWebsite = (Button) findViewById(R.id.btnWebsite);
         imgLogo = (ImageView) findViewById(R.id.imgLogo);
 
-        imgLogo.setImageResource(R.drawable.apple_logo);
+        Intent intent = getIntent();
+        String match = intent.getStringExtra("MATCH");
+
+
+        String filePath = Utils.AssetToCache(this, "images" + "/" + match, match).getPath();
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+        imgLogo.setImageBitmap(bitmap);
+        btnWebsite.setText(match.split("0")[0] + " - GO TO WEBSITE");
 
         btnWebsite.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,4 +60,6 @@ public class AnalysisActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 }

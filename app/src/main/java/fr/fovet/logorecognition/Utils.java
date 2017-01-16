@@ -119,5 +119,4 @@ public class Utils {
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
 
-
 }
