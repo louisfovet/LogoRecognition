@@ -3,6 +3,8 @@ package fr.fovet.logorecognition;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,6 +25,7 @@ import org.bytedeco.javacpp.opencv_features2d.*;
 import org.bytedeco.javacpp.opencv_nonfree.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Uri photoURI;
     private String photoPath;
+    private String filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,13 @@ public class MainActivity extends AppCompatActivity {
         btnLibrary = (Button) findViewById(R.id.btnLibrary);
         btnAnalysis = (Button) findViewById(R.id.btnAnalysis);
         imgAnalysis = (ImageView) findViewById(R.id.imgAnalysis);
+
+        btnAnalysis.setEnabled(true);
+
+        String refFile = "starbucks0.png";
+        filePath = Utils.AssetToCache(this, "images" + "/" + refFile, refFile).getPath();
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+        imgAnalysis.setImageBitmap(bitmap);
 
         btnCapture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,8 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 //Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
                 //startActivity(intent);
                 try {
-                    Utils.callOpenCV(photoPath);
-                    btnAnalysis.setText("ok");
+                    Utils.callOpenCV(getApplicationContext(), filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -89,12 +99,16 @@ public class MainActivity extends AppCompatActivity {
         if(resultCode == RESULT_OK && data != null) {
 
             if(requestCode == REQUEST_IMAGE_CAPTURE) {
+
             }
 
             if(requestCode == REQUEST_IMAGE_SELECT) {
                 photoURI = data.getData();
             }
 
+            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+            Bitmap resizedBitmap = Utils.scaleBitmapDown(bitmap, 500);
+            filePath = Utils.BitmapToCache(this, resizedBitmap, "test.jpg").getPath();
 
             imgAnalysis.setImageURI(photoURI);
             btnAnalysis.setEnabled(true);
@@ -148,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
             }
             if (photoFile != null) {
                 photoPath = photoFile.getAbsolutePath();
-                photoURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", photoFile);
+                //photoURI = FileProvider.getUriForFile(this, "com.example.android.fileprovider", photoFile);
+                photoURI = Uri.fromFile(photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
