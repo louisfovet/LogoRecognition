@@ -31,7 +31,7 @@ public class Utils {
     private static final double EDGE_THRESHOLD = 10;
     private static final double SIGMA = 1.6;
 
-    public static void callOpenCV(Context context, String photoPath) throws IOException {
+    public static Mat getDescriptor(Context context, String photoPath) throws IOException {
 
         Mat img = imread(photoPath);
 
@@ -47,6 +47,8 @@ public class Utils {
         sift.compute(img, keyPoints, descriptor);
 
         Toast.makeText(context, "Nb of detected keypoints:" + keyPoints.capacity(), Toast.LENGTH_LONG).show();
+
+        return descriptor;
     }
 
     public static File AssetToCache(Context context, String Path, String fileName) {

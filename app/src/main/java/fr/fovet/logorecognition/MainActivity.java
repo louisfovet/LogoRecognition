@@ -87,7 +87,11 @@ public class MainActivity extends AppCompatActivity {
                 //Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
                 //startActivity(intent);
                 try {
-                    Utils.callOpenCV(getApplicationContext(), filePath);
+
+                    Mat descriptor = new Mat();
+                    descriptor = Utils.getDescriptor(getApplicationContext(), filePath);
+                    assetManager.searchForMatch(descriptor);
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
