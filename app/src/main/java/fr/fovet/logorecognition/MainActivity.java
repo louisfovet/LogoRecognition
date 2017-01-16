@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private String photoPath;
     private String filePath;
 
+    private AssetManager assetManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
         imgAnalysis = (ImageView) findViewById(R.id.imgAnalysis);
 
         btnAnalysis.setEnabled(true);
+
+        assetManager = new AssetManager(this);
 
         String refFile = "starbucks0.png";
         filePath = Utils.AssetToCache(this, "images" + "/" + refFile, refFile).getPath();

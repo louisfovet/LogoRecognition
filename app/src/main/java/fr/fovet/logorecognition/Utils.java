@@ -31,20 +31,8 @@ public class Utils {
     private static final double EDGE_THRESHOLD = 10;
     private static final double SIGMA = 1.6;
 
-    public static Mat load(File file, int flags) throws IOException {
-        if(!file.exists()) {
-            throw new FileNotFoundException("Image file does not exist: " + file.getAbsolutePath());
-        }
-        Mat image = imread(file.getAbsolutePath(), flags);
-        if(image == null || image.empty()) {
-            throw new IOException("Couldn't load image: " + file.getAbsolutePath());
-        }
-        return image;
-    }
-
     public static void callOpenCV(Context context, String photoPath) throws IOException {
 
-        //Mat photo = Utils.load(new File(photoPath), 1);
         Mat img = imread(photoPath);
 
         if(img.empty()) {
@@ -128,5 +116,6 @@ public class Utils {
         }
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
+
 
 }
