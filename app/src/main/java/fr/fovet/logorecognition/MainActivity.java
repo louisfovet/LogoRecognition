@@ -1,33 +1,26 @@
 package fr.fovet.logorecognition;
 
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.javacpp.opencv_calib3d;
-import org.bytedeco.javacpp.opencv_core.*;
-import org.bytedeco.javacpp.opencv_features2d.*;
-import org.bytedeco.javacpp.opencv_nonfree.*;
+import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -42,10 +35,20 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgAnalysis;
 
     private Uri photoURI;
+    private Uri destination;
     private String filePath;
 
     private AssetManager assetManager;
+    private CallServer callServer;
 
+    /**
+     * A la création de l'activité, appelle le serveur afin de récupérer les informations
+     * nécessaires à l'application de l'algo SIFT.
+     * On a 3 boutons sur cette activité:
+     * - prise de photo
+     * - sélection de photo dans la bibliothèque
+     * - analyse de la photo (lancement d'AnalysisActivity)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
         btnAnalysis = (Button) findViewById(R.id.btnAnalysis);
         imgAnalysis = (ImageView) findViewById(R.id.imgAnalysis);
 
-        assetManager = new AssetManager(this);
+        //assetManager = new AssetManager(this);
+        callServer = new CallServer(this);
 
         btnCapture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,12 +82,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
+                    /*Mat descriptor = Utils.getDescriptor(getApplicationContext(), filePath);
+                    String match = assetManager.searchForMatch(descriptor);*/
 
-                    Mat descriptor = Utils.getDescriptor(getApplicationContext(), filePath);
-                    String match = assetManager.searchForMatch(descriptor);
+                    Compute c = new Compute(getApplicationContext(), callServer, filePath);
 
                     Intent intent = new Intent(MainActivity.this, AnalysisActivity.class);
-                    intent.putExtra("MATCH", match);
+                    intent.putExtra("MATCH", c.getBestMatch());
+                    intent.putExtra("IMAGE", c.getImagePathMatch());
+                    intent.putExtra("URL", c.getUrlMatch());
+                    Log.i("MainActivity", "onActivityResult: match " + c.getBestMatch());
                     startActivity(intent);
 
                 } catch (IOException e) {
@@ -94,27 +102,56 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 3 résultats possibles:
+     * - traitement si on a capturé une photo
+     * - traitement si on a sélectionné une photo
+     * - traitement si on a crop la photo
+     * Dans tous les cas, la photo affichée est actualisée
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == RESULT_OK && data != null) {
 
-            if(requestCode == REQUEST_IMAGE_CAPTURE) {
+            Bitmap bitmap = null;
 
+            if(requestCode == REQUEST_IMAGE_CAPTURE) {
+                bitmap = BitmapFactory.decodeFile(photoURI.getPath());
             }
 
             if(requestCode == REQUEST_IMAGE_SELECT) {
                 photoURI = data.getData();
+
+                try {
+                    InputStream is = getContentResolver().openInputStream(photoURI);
+                    bitmap = BitmapFactory.decodeStream(is);
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
 
-            Bitmap bitmap = BitmapFactory.decodeFile(photoURI.getPath());
+            if(requestCode == Crop.REQUEST_CROP) {
+                photoURI = Crop.getOutput(data);
+                bitmap = BitmapFactory.decodeFile(photoURI.getPath());
+            }
+
+
             Bitmap resizedBitmap = Utils.scaleBitmapDown(bitmap, 500);
             filePath = Utils.BitmapToCache(this, resizedBitmap, "test.jpg").getPath();
 
             imgAnalysis.setImageURI(photoURI);
             btnAnalysis.setEnabled(true);
             btnAnalysis.setText("Analysis");
+
+
+            if(requestCode != Crop.REQUEST_CROP) {
+                destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
+                Crop.of(photoURI, destination).start(this);
+            }
 
         }
 
@@ -142,6 +179,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Création d'un fichier
+     *
+     * @return  File    fichier dans lequel sera stocké l'image capturé
+     */
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -153,6 +195,9 @@ public class MainActivity extends AppCompatActivity {
         return image;
     }
 
+    /**
+     * Intent utilisé pour la capture d'une photo
+     */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if(takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -170,16 +215,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Intent utilisé pour la sélection d'une photo
+     */
     private void dispatchSelectPictureIntent() {
-        Intent selectPictureIntent = new Intent(Intent.ACTION_PICK,
+        /*Intent selectPictureIntent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         if(selectPictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(selectPictureIntent, REQUEST_IMAGE_SELECT);
-        }
+        }*/
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select picture"), REQUEST_IMAGE_SELECT);
     }
-
-
-
-
 
 }

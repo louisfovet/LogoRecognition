@@ -34,5 +34,6 @@ dependencies {
     compile 'com.android.support:design:23.1.0'
     compile group: 'org.bytedeco', name: 'javacv', version: '0.11'
     compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '2.4.11-0.11', classifier: 'android-arm'
-    //compile group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version: '2.6.1-0.11', classifier: 'android-arm'
+    compile 'com.android.volley:volley:1.0.0'
+    compile 'com.soundcloud.android:android-crop:1.0.1@aar'
 }

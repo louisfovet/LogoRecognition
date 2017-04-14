@@ -20,8 +20,16 @@ public class AnalysisActivity extends AppCompatActivity {
 
     private Button btnWebsite;
     private ImageView imgLogo;
-    String website;
 
+    private String match;
+    private String image;
+    private String url;
+
+    /**
+     * A la création de l'activité, on récupère la marque qui a match avec notre photo
+     * Le nom et l'image de référence de la marque est affichée
+     * Le site web est disponible via un boutton.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,19 +43,23 @@ public class AnalysisActivity extends AppCompatActivity {
         imgLogo = (ImageView) findViewById(R.id.imgLogo);
 
         Intent intent = getIntent();
-        String match = intent.getStringExtra("MATCH");
-        website = Utils.getWebsite(match);
+        match = intent.getStringExtra("MATCH");
+        image = intent.getStringExtra("IMAGE");
+        url = intent.getStringExtra("URL");
 
-        String filePath = Utils.AssetToCache(this, "images" + "/" + match, match).getPath();
-        Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-        imgLogo.setImageBitmap(bitmap);
-        btnWebsite.setText(match.split("0")[0] + " - GO TO WEBSITE");
+        //website = Utils.getWebsite(match);
+
+        /*String filePath = Utils.AssetToCache(this, "images" + "/" + match, match).getPath();
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath);*/
+
+        imgLogo.setImageBitmap(BitmapFactory.decodeFile(image));
+        btnWebsite.setText(match + " - GO TO WEBSITE");
 
         btnWebsite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse(website));
+                        Uri.parse(url));
                 startActivity(browserIntent);
             }
         });

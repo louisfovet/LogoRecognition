@@ -2,8 +2,12 @@ package fr.fovet.logorecognition;
 
 
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.widget.Toast;
 
 import org.bytedeco.javacpp.Loader;
@@ -24,6 +28,9 @@ import static org.bytedeco.javacpp.opencv_highgui.imread;
 
 public class Utils {
 
+    public static final String SERVER_NAME="http://www-rech.telecom-lille.fr/nonfreesift/";
+    //public static final String SERVER_NAME="http://www-rech.telecom-lille.fr/freeorb/";
+
     // SIFT keypoint features
     private static final int N_FEATURES = 0;
     private static final int N_OCTAVE_LAYERS = 3;
@@ -31,6 +38,13 @@ public class Utils {
     private static final double EDGE_THRESHOLD = 10;
     private static final double SIGMA = 1.6;
 
+    /**
+     * Récupère le descripteur d'une image donnée (v2 de l'application)
+     *
+     * @param  context  Contexte de l'application
+     * @param  photoPath  Chemin complet de la photo
+     * @return  Mat  the image descriptor
+     */
     public static Mat getDescriptor(Context context, String photoPath) throws IOException {
 
         Mat img = imread(photoPath);
@@ -51,6 +65,14 @@ public class Utils {
         return descriptor;
     }
 
+    /**
+     * Stocke une asset en cache (v2 de l'application)
+     *
+     * @param  context  Contexte de l'application
+     * @param  Path  Chemin où l'on trouve l'asset
+     * @param  fileName  Nom que l'on donne à l'image mise en cache
+     * @return  File  renvoie l'image mise en cache
+     */
     public static File AssetToCache(Context context, String Path, String fileName) {
         InputStream input;
         FileOutputStream output;
@@ -76,6 +98,14 @@ public class Utils {
         }
     }
 
+    /**
+     * Stocke un bitmap en cache
+     *
+     * @param  context  Contexte de l'application
+     * @param  bitmap  image à mettre en cache
+     * @param  fileName  Nom que l'on donne à l'image mise en cache
+     * @return  File  renvoie l'image mise en cache
+     */
     public static File BitmapToCache(Context context, Bitmap bitmap, String fileName) {
         File file = new File(context.getCacheDir(), fileName);
 
@@ -99,6 +129,42 @@ public class Utils {
         }
     }
 
+    /**
+     * Stocke une string en cache
+     *
+     * @param  context  Contexte de l'application
+     * @param  string  string à mettre en cache
+     * @param  fileName  Nom que l'on donne à l'image mise en cache
+     * @return  File  renvoie l'image mise en cache
+     */
+    public static File stringToCache(Context context, String string, String fileName) {
+        File file = new File(context.getCacheDir(), fileName);
+
+        try {
+            file.createNewFile();
+
+            byte[] stringData = string.getBytes();
+
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(stringData);
+
+            fos.flush();
+            fos.close();
+
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Utilisée pour réduire l'image (sinon problèmes de mémoire)
+     *
+     * @param  bitmap  image à réduire
+     * @param  maxDimension  dimension max de l'image
+     * @return  Bitmap  renvoie l'image réduite
+     */
     public static Bitmap scaleBitmapDown(Bitmap bitmap, int maxDimension) {
 
         int originalWidth = bitmap.getWidth();
@@ -119,6 +185,12 @@ public class Utils {
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
 
+    /**
+     * Renvoie le site web associé à une marque
+     *
+     * @param  match  string correspondant au nom de l'image
+     * @return  String  renvoie le site web correspond à la marque
+     */
     public static String getWebsite(String match) {
         String website = "";
 
